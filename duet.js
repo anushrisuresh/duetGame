@@ -25,6 +25,8 @@ const redRadius = 7;
 var rightPressed = false;
 var leftPressed = false;
 
+var paused = false;
+
 /*var brickWidth = Math.random()*100;
 var brickHeight= 40;
 
@@ -51,9 +53,17 @@ function makeSquare(x, y, length,breadth, speed) {
 // ID to track the spawn timeout
 //var timeoutId = null;
 
+
+
+
+
 function animate() {
     
     //ctx.clearRect(0, 0, canvas.width, canvas.height); 
+ if(paused){
+ 	return;
+ }
+
 
     ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -62,7 +72,7 @@ function animate() {
     //drawBricks();
    // getBricks();
    drawScore();
-   
+   drawButton();
    draw();
        //drawScore();
     //collisionDetection();
@@ -89,17 +99,19 @@ function animate() {
     angleRed -= speed;;
 		}
 
+	
 		//yBrick+=brickSpeed ;
    
 
     
-    setTimeout(animate, 30);
+    //setTimeout(animate, 30);
 
 //timeoutId = setInterval(makeEnemy, timeBetweenEnemies);
 
 }
 //timeoutId = setInterval(makeEnemy, timeBetweenEnemies);
 //setInterval(makeEnemy,200);
+//setInterval(animate,30);
 function drawDuet(){
 
 	 ctx.beginPath();
@@ -136,31 +148,48 @@ var enemyBaseSpeed = 2;
 function increaseSpeed(){
 	enemyBaseSpeed++;
 }
-setInterval(increaseSpeed,50000);
+//setInterval(increaseSpeed,50000);
 
  var enemyLength =  40;
   var enemyBreadth =20;
 function makeEnemy() {
-  var enemyX = 450 + Math.floor(Math.random()*450);
+	if(paused){
+		return;
+	}
+  var enemyX = (innerWidth/3) + Math.floor(Math.random()*innerWidth/3);
  
   var enemyY = 0;
   var enemySpeed = enemyBaseSpeed;
   //enemies.push(makeSquare(enemyX, enemyY, enemySize, enemySpeed));
   
-
 enemies.push(makeSquare(enemyX, enemyY, enemyLength, enemyBreadth, enemySpeed));
 //score++;
 }
 function getScore(){
+	if(paused){
+		return;
+	}
 	score++;
 }
-setInterval(getScore,1000);
+//setInterval(getScore,1000);
 
 function drawScore() {
     ctx.font = "16px Arial";
     ctx.fillStyle = "#0095DD";
     ctx.fillText("Score: "+score, 8, 20);
 }
+
+ /*function Pause()
+{
+    if (paused==false)
+    {
+        paused = true;
+    } else if (paused==true)
+    {
+       paused= false;
+    }
+
+}*/
 /*function getBricks(){
 	
 
@@ -193,7 +222,26 @@ function drawScore() {
 
 	}
 */
-let interval = setInterval(makeEnemy,2000);
+//let interval=setInterval(makeEnemy,2000);
+let brickTime =2000;
+if(score>=50&&score<100){
+ brickTime = 1500;
+}
+else if(score>=100&&score<150){
+ bricktime =1000;
+}
+else if (score>=150){
+	bricktime=500;
+}
+
+	 setInterval(animate,30);
+	 let interval = setInterval(makeEnemy,brickTime);
+	 setInterval(increaseSpeed,50000);
+	 setInterval(getScore,1000);
+
+	
+
+
 function draw() {
   //erase();
 
@@ -235,5 +283,63 @@ function keyUpHandler(e) {
         leftPressed = false;
     }
 }
+/*if(!paused)
+	{ 
+	 setInterval(animate,30);
+	 let interval=setInterval(makeEnemy,2000);
+	 setInterval(increaseSpeed,50000);
+	 setInterval(getScore,1000);
+
+	}*/
+document.addEventListener('keydown',pause,false); 
+
+function pause(e){
+	if(e.keyCode === 80){
+		paused = !paused;
+	}
+}
+
+ var buttonX = 120;
+    var buttonY = 20;
+    var buttonW = 80;
+    var buttonH = 30;
+ 
+    // Render button
+    function drawButton(){
+    	ctx.font = '20px serif';
+  ctx.fillText('Restart', 124, 40);
+
+    ctx.fillStyle = 'rgba(255, 165, 0, 0.3)';
+    ctx.fillRect(buttonX, buttonY, buttonW, buttonH);
+}
+
+
+document.addEventListener("click",restart);
+
+function restart(event){
+	if(event.x > buttonX && 
+        event.x < buttonX + buttonW &&
+        event.y > buttonY && 
+        event.y < buttonY + buttonH){
+		document.location.reload();
+            clearInterval(interval);
+	}
+}
+
+/*if (e.key == "80")// spacebar key
+{
+    if (paused==false)
+    {
+        paused = true;
+    } else if (paused==true)
+    {
+       paused= false;
+    }
+
+}
+});*/
+
+
+console.log(paused);
 
  animate();
