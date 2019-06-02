@@ -25,18 +25,31 @@ const redRadius = 7;
 var rightPressed = false;
 var leftPressed = false;
 
-var brickWidth = Math.random()*100;
+/*var brickWidth = Math.random()*100;
 var brickHeight= 40;
 
-var brickPadding = 30;
+var brickPadding = 30;*/
 
 
-var yBrick=0;
+
  
-var brickSpeed = 0.5;
 var score = 0;
 
-
+function makeSquare(x, y, length,breadth, speed) {
+  return {
+    x: x,
+    y: y,
+    l: length,
+    b:breadth,
+    s: speed,
+    draw: function() {
+      ctx.fillRect(this.x, this.y, this.l, this.b);
+    }
+  };
+}
+//var timeBetweenEnemies = 5 * 1000;
+// ID to track the spawn timeout
+//var timeoutId = null;
 
 function animate() {
     
@@ -47,8 +60,11 @@ function animate() {
 
     drawDuet();      
     //drawBricks();
-    getBricks();
-    //drawScore();
+   // getBricks();
+   drawScore();
+   
+   draw();
+       //drawScore();
     //collisionDetection();
     
     var newXBlue  = bigRadius * Math.cos(angleBlue * (Math.PI/180));
@@ -73,12 +89,17 @@ function animate() {
     angleRed -= speed;;
 		}
 
-		yBrick+=brickSpeed ;
-    
+		//yBrick+=brickSpeed ;
+   
+
     
     setTimeout(animate, 30);
-}
 
+//timeoutId = setInterval(makeEnemy, timeBetweenEnemies);
+
+}
+//timeoutId = setInterval(makeEnemy, timeBetweenEnemies);
+//setInterval(makeEnemy,200);
 function drawDuet(){
 
 	 ctx.beginPath();
@@ -99,48 +120,100 @@ function drawDuet(){
 	ctx.fill();
 	ctx.closePath();
 }
-var xBrick = Math.floor(Math.random()*(window.innerWidth-brickWidth));
+//var xBrick = Math.floor(Math.random()*(window.innerWidth-brickWidth));
 
-function getBricks(){
-	
-	
-	var bricks = [];
+/*var bricks = [];
 	bricks[0]={
-	x:xBrick,
-	y:0
-	};
+	(x+0):xBrick,
+	(y+0):0
+	};*/
+
+	var enemies = [];
+
+// Add an enemy object to the array
+var enemyBaseSpeed = 2;
+
+function increaseSpeed(){
+	enemyBaseSpeed++;
+}
+setInterval(increaseSpeed,50000);
+
+ var enemyLength =  40;
+  var enemyBreadth =20;
+function makeEnemy() {
+  var enemyX = 450 + Math.floor(Math.random()*450);
+ 
+  var enemyY = 0;
+  var enemySpeed = enemyBaseSpeed;
+  //enemies.push(makeSquare(enemyX, enemyY, enemySize, enemySpeed));
+  
+
+enemies.push(makeSquare(enemyX, enemyY, enemyLength, enemyBreadth, enemySpeed));
+//score++;
+}
+function getScore(){
+	score++;
+}
+setInterval(getScore,1000);
+
+function drawScore() {
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "#0095DD";
+    ctx.fillText("Score: "+score, 8, 20);
+}
+/*function getBricks(){
+	
 
 	for(var i=0 ; i < bricks.length;i++){
 		
-		bricks[i].y = yBrick;
-		
-
+		bricks[i][y+i] = yBrick;
+			
 		ctx.fillStyle='green';
-		ctx.fillRect(bricks[i].x,bricks[i].y,brickWidth,brickHeight);
+		ctx.fillRect(bricks[i][x+i],bricks[i][y+i],brickWidth,brickHeight);
+		console.log(bricks.length);
 
-		var newX=Math.floor(Math.random()*(window.innerWidth-brickWidth));
-		//console.log(window.innerHeight/2);
-		//console.log(-bricks[i].y);
+		if(bricks[i][y+i]===window.innerHeight/2){
+       console.log(bricks);
+    
+       //for(j=1;j<bricks.length;j++){
 
-		if(bricks[i].y===window.innerHeight/2){
-     //console.log(bricks[0]);
-     var obj = {};
-		obj["x"] = newX ;
-		obj["y"] = 0;
+ 		var obj = {};
+		obj["x+i"] = 0 ;
+		obj["y+i"] = 0;
 		bricks.push(obj);
-			/*bricks.push({
-				x:10,
-				y:0
-				})*/
-		}
+
+		console.log(bricks);
+			bricks[i][x+i]= Math.floor(Math.random()*(window.innerWidth-brickWidth));
+			bricks[i][y+i]=y+i;
+			(y+i)= (y+i)+0.5;
+
+		
+			
+				}		}
 
 	}
+*/
+let interval = setInterval(makeEnemy,2000);
+function draw() {
+  //erase();
+
+  // Move and draw the enemies
+  enemies.forEach(function(enemy) {
+    enemy.y += enemyBaseSpeed;
+    
+    ctx.fillStyle = '#00FF00';
+
+    enemy.draw();
+
+    if(enemy.x<xBlue && xBlue<enemy.x+enemyLength && enemy.y<yBlue && yBlue<enemy.y+enemyBreadth || enemy.x<xRed && xRed<enemy.x+enemyLength && enemy.y<yRed && yRed<enemy.y+enemyBreadth){
+    		alert("GAME OVER");
+            document.location.reload();
+            clearInterval(interval);
+    }
+  });
 }
 
-
-
-
-
+console.log(enemies);
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
@@ -163,8 +236,4 @@ function keyUpHandler(e) {
     }
 }
 
-    
-
-
-
-animate();
+ animate();
