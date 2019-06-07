@@ -106,6 +106,13 @@ var leftPressed = false;
 //merge
 var mergeStatus=0;
 
+//instructions
+var instructionStatus=false;
+var instructionButtonX= window.innerWidth-157;
+var instructionButtonY= 180;
+var instructionButtonW= 120;
+var instructionButtonH=30;
+
 function animate() {
        
  if(paused){
@@ -128,6 +135,7 @@ function animate() {
      drawRotatingBrick();
      merge();
      drawAffection();
+     instructionsButton();
     
     var newXBlue  = bigRadius * Math.cos(angleBlue * (Math.PI/180));
     var newYBlue = bigRadius * Math.sin(angleBlue * (Math.PI/180));
@@ -526,7 +534,8 @@ else if (score>=150){
 function instructions(){
 	ctx.fillStyle = "#0095DD";
 		ctx.font = '20px serif';
-		ctx.fillText("Instructions:",canvas.width-150,200);
+		
+		if(instructionStatus==true){
 		ctx.fillText("'p' to pause",canvas.width-150,240);
 		ctx.fillText("<- anticlockwise",canvas.width-160,260);
 		ctx.fillText("-> clockwise",canvas.width-150,280);
@@ -536,6 +545,7 @@ function instructions(){
 		ctx.fillText("aqua block",canvas.width-150,400);
 		ctx.fillText("=" ,canvas.width-100,420);
 		ctx.fillText("flight powerup",canvas.width-150,440);
+	}
 		
 
 }
@@ -559,6 +569,17 @@ function multiplayerButton(){
 	ctx.fillStyle = '#ffffff';
     ctx.font = '20px serif';
   	ctx.fillText('multiplayer', window.innerWidth-197, 40);
+
+		}
+
+function  instructionsButton(){
+
+	ctx.fillStyle = 'rgb(0, 0, 0)';
+    ctx.fillRect(instructionButtonX,instructionButtonY,instructionButtonW,instructionButtonH);
+
+	ctx.fillStyle = '#ffffff';
+    ctx.font = '20px serif';
+  	ctx.fillText('instructions', window.innerWidth-150,200);
 
 		}
 
@@ -640,6 +661,18 @@ function restart(event){
         event.y < restartButtonY + restartButtonH){
 		document.location.reload();
             clearInterval(interval);
+	}
+}
+document.addEventListener("click",instructionsClick);
+
+function instructionsClick(event){
+
+	if(event.x > instructionButtonX && 
+        event.x < instructionButtonX + instructionButtonW &&
+        event.y > instructionButtonY && 
+        event.y < instructionButtonY + instructionButtonH){
+		
+		instructionStatus = !instructionStatus;
 	}
 }
 
