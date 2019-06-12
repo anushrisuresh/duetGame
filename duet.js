@@ -20,8 +20,18 @@ var ctx = canvas.getContext('2d');
  //var blueImg = new Image();
  //blueImg.src = 'https://img6.androidappsapk.co/300/0/0/7/com.xooxle.blueballworld.png';
 //red img
+var blueSharperImg = new Image();
+blueSharperImg.src = 'blueSharper.png';
+
+
+
+blueSharperImg.width= 64;
+blueSharperImg.height= 64;
+
+
 var redImg = new Image();
 redImg.src = 'https://images-eu.ssl-images-amazon.com/images/I/512I%2BPOfVzL.png'
+
 
  //blueImg.width=2*blueRadius;
 //blueImg.height=2*blueRadius;
@@ -42,8 +52,8 @@ redImg.height= 2*redRadius;
  var brickBreadth =20;
 
 //brick img
-//var brickImg= new Image();
-//brickImg.src = 'duetGame/brick.png'
+var brickImg= new Image();
+brickImg.src = 'brick.png'
  //meter variables
  var meter=[];
  var xaffection= 40;
@@ -60,13 +70,18 @@ var horlicksLength = 20;
 var horlicksBreadth = 40;
 var horlicksSpeed =1.5;
 var horlicksStatus=false;
+//horlicks img
+var horlicksImg= new Image();
+horlicksImg.src = 'horlicks.png';
 
 //Flight variables
 var flights=[];
-var flightLength = 20;
-var flightBreadth = 40;
+var flightLength = 50;
+var flightBreadth = 80;
 var flightSpeed =2.5;
 
+var flightImg= new Image();
+flightImg.src = 'flight.png'
 //Rotating block variables
 var rotatingBricks=[];
 var rotatingBrickSpeed=1;
@@ -113,6 +128,70 @@ var instructionButtonY= 180;
 var instructionButtonW= 120;
 var instructionButtonH=30;
 
+//game over
+var gameOver=false;
+
+var start=false;
+
+function menu() {
+
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  ctx.fillStyle = '#000000';
+  ctx.font = '36px Arial';
+  
+  ctx.fillText('Click here to Start', canvas.width/2-150, 200);
+  ctx.font = '18px Arial';
+  ctx.fillText('<- anticlockwise and -> clockwise', canvas.width/2-150, (canvas.height / 4) * 3);
+  ctx.fillText("'p' to pause",canvas.width/2-50,(canvas.height / 4) * 3 + 50);
+  
+  canvas.addEventListener('click', startGame);
+ 
+}
+
+// Start the game
+function startGame() {
+
+ start =true;
+  animateInterval=setInterval(animate,30);
+  interval = setInterval(makeBrick,brickTime);
+   speedInterval=setInterval(increaseSpeed,50000);
+   scoreInterval=setInterval(getScore,1000);
+   meterInterval=setInterval(makeMeter,1000);
+   horlicksInterval=setInterval(makeHorlicksPacket,10000);
+   flightInterval=setInterval(makeFlight,20000);
+   rotatingInterval=setInterval(makeRotatingBrick,5000);
+
+   animate();
+  
+  canvas.removeEventListener('click', startGame);
+}
+
+function endGame() {
+
+  clearInterval(animateInterval);
+  clearInterval(interval);
+  clearInterval(speedInterval);
+  clearInterval(scoreInterval);
+   clearInterval(meterInterval);
+   clearInterval(horlicksInterval);
+   clearInterval(flightInterval);
+   clearInterval(rotatingInterval);
+
+  
+
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0,canvas.width,canvas.height);
+
+  ctx.fillStyle = '#000000';
+  ctx.font = '24px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('Game Over. Final Score: ' + score, canvas.width / 2, canvas.height / 2);
+  ctx.fillText('Click here to start new game',canvas.width /2,canvas.height/2+30);
+  
+}
+
 function animate() {
        
  if(paused){
@@ -125,7 +204,7 @@ function animate() {
 
     instructions();
      drawDuet();      
- 	 addMeter();
+ 	   addMeter();
      drawScore();
      drawRestartButton();
      drawBricks();
@@ -160,6 +239,10 @@ function animate() {
 		}
 
 		ctx.strokeRect(40,400,30,100);
+
+    if(gameOver){
+      endGame();
+    }
 }
 
 
@@ -171,12 +254,19 @@ function drawDuet(){
 	ctx.strokeStyle = 'grey';
 	ctx.stroke();
 	ctx.closePath();
-if(mergeStatus==0){
+
+if(horlicksStatus==false){
 	ctx.beginPath();
 	ctx.arc(xBlue,yBlue,blueRadius,0,Math.PI*2,true);
 	ctx.fillStyle = 'blue';
 	ctx.fill();
 	ctx.closePath();
+}
+else if(horlicksStatus==true){
+  ctx.save();
+  ctx.drawImage(blueSharperImg,xBlue-32,yBlue-32,blueSharperImg.width,blueSharperImg.height)
+  ctx.restore();
+}
 	
 	
   	//blueImg.onload = function() {
@@ -194,7 +284,7 @@ if(mergeStatus==0){
 	ctx.save();
     ctx.drawImage(redImg, xRed-redRadius, yRed-redRadius,redImg.width,redImg.height);
     ctx.restore();
- }
+ 
 }
 //var xBrick = Math.floor(Math.random()*(window.innerWidth-brickWidth));
 
@@ -206,6 +296,7 @@ function rectangleFactory(x, y, length,breadth, speed,status,img) {
     b:breadth,
     s: speed,
     p:status,
+    //img:img,
     draw: function() {
       ctx.fillRect(this.x, this.y, this.l, this.b);
     },
@@ -219,13 +310,13 @@ function makeBrick() {
 	if(paused){
 		return;
 	}
-  var brickX = ((window.innerWidth/2-100) + Math.floor(Math.random()*200));
+  var brickX = ((canvas.width/2-100) + Math.floor(Math.random()*200));
   var brickY = 0;
   var brickLength = Math.floor(Math.random()*70);
   var status = 1;
   
   
-  bricks.push(rectangleFactory(brickX, brickY, brickLength, brickBreadth, brickSpeed,status));
+  bricks.push(rectangleFactory(brickX, brickY, brickLength, brickBreadth, brickSpeed,status/*,brickImg*/));
 
 }
 
@@ -236,9 +327,9 @@ function drawBricks() {
       brick.y += brickSpeed;
     
       ctx.fillStyle = 'rgba(0,128,128,0.7)';
-     /* ctx.save();
-      ctx.drawImage(brick.img,brick.x,brick.y,brick.l,brick.b);
-      ctx.restore();*/
+      ctx.save();
+      ctx.drawImage(brickImg,brick.x,brick.y,brick.l,brick.b);
+      ctx.restore();
      
 if(horlicksStatus==false){
     if(brick.x<xBlue && xBlue<brick.x+brick.l && brick.y<yBlue && yBlue<brick.y+brickBreadth || brick.x<xRed && xRed<brick.x+brick.l && brick.y<yRed && yRed<brick.y+brickBreadth){
@@ -249,16 +340,18 @@ if(horlicksStatus==false){
             }
 
     	else if(multiplayerStatus==false){
-    		alert("GAME OVER");
+
+          gameOver=true;
+    		/*alert("GAME OVER");
             document.location.reload();
-            clearInterval(interval);
+            clearInterval(setInterval(makeBrick,brickTime));*/
         }
 
         }
     }
-    if(brick.p==1){
-         brick.draw();
-   }
+    //if(brick.p==1){
+         //ctx.drawImage();
+   //}
   });
 }
 
@@ -293,7 +386,9 @@ function moveHorlicksPacket() {
 
        }
        if(packet.p==1){
-       	packet.draw();
+       	ctx.save();
+      ctx.drawImage(horlicksImg,packet.x,packet.y,packet.l,packet.b);
+      ctx.restore();
        }
 
       });
@@ -313,7 +408,7 @@ function makeFlight() {
 	if(paused){
 		return;
 	}
-  var flightX = ((window.innerWidth/2-50) + 2*bigRadius-10);
+  var flightX = ((canvas.width/2-50) + 2*bigRadius-10);
   var flightY = 0;
   var status=1
   
@@ -335,7 +430,10 @@ function moveFlight() {
 
       }
       if(flight.p==1){
-      	flight.draw();
+      	//flight.draw();
+        ctx.save();
+      ctx.drawImage(flightImg,flight.x,flight.y,flight.l,flight.b);
+      ctx.restore();
       }
       });
 }
@@ -439,7 +537,7 @@ function merge(){
 		meter.forEach(function(level){
 			meter.pop();
 		})
-		//ctx.clearRect(xaffection,400,affectionW,200);
+	
 		//yaffection=500;
 
 		/*if(xBlue==xRed&&yBlue==yRed){
@@ -585,14 +683,14 @@ function  instructionsButton(){
 
 		//all intervals
 
-     setInterval(animate,30);
+ /*    setInterval(animate,30);
 	 let interval = setInterval(makeBrick,brickTime);
 	 setInterval(increaseSpeed,50000);
 	 setInterval(getScore,1000);
 	 setInterval(makeMeter,1000);
 	 setInterval(makeHorlicksPacket,10000);
 	 setInterval(makeFlight,20000);
-	 setInterval(makeRotatingBrick,5000);
+	 setInterval(makeRotatingBrick,5000);*/
 
 // all button controls
 
@@ -644,24 +742,22 @@ function pause(e){
 		}
 
 
-/*function instructions(){
-		ctx.fillStyle = 'rgb(0,0,0)';
-		ctx.font = '20px serif';
-		ctx.fillText('Press "p" to pause 	Right arrow key is clockwise 	Left arrow key is anticlockwise',200,40);
-}*/
 
-//click restart
 document.addEventListener("click",restart);
+
 
 function restart(event){
 
 	if(event.x > restartButtonX && 
         event.x < restartButtonX + restartButtonW &&
         event.y > restartButtonY && 
-        event.y < restartButtonY + restartButtonH){
+        event.y < restartButtonY + restartButtonH||event.x>canvas.width/2-300&&event.x<canvas.width/2+300&&event.y>canvas.height/2-100&&event.y<canvas.height/2+100){
 		document.location.reload();
             clearInterval(interval);
+            document.removeEventListener("click",restart);
+           
 	}
+
 }
 document.addEventListener("click",instructionsClick);
 
@@ -670,11 +766,12 @@ function instructionsClick(event){
 	if(event.x > instructionButtonX && 
         event.x < instructionButtonX + instructionButtonW &&
         event.y > instructionButtonY && 
-        event.y < instructionButtonY + instructionButtonH){
+        event.y < instructionButtonY + instructionButtonH)
+  {
 		
 		instructionStatus = !instructionStatus;
 	}
 }
 
 
- animate();
+// animate();
